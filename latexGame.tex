@@ -1,0 +1,537 @@
+% ============================================================
+%  MINI MAZE GAME  —  Deon George
+%  Compile with:  pdflatex maze_game.tex
+%  Requires packages: xcolor, tikz, hyperref, geometry,
+%                     fontenc, mdframed, eso-pic
+% ============================================================
+\documentclass[a4paper,12pt]{article}
+
+% ── Core packages ──────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[margin=0pt]{geometry}   % full bleed pages
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathmorphing, shadows, patterns}
+\usepackage{hyperref}
+\usepackage{mdframed}
+\usepackage{eso-pic}
+\usepackage{graphicx}
+\usepackage{calc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{array}
+
+% ── Colour palette ─────────────────────────────────────────
+\definecolor{pagebg}      {HTML}{0D0A0B}   % near-black parchment
+\definecolor{cardback}    {HTML}{18120F}   % dark card
+\definecolor{goldbright}  {HTML}{C9A84C}   % gold accent
+\definecolor{golddim}     {HTML}{7A5F28}   % dim gold
+\definecolor{bloodbright} {HTML}{C0392B}   % danger red
+\definecolor{blooddark}   {HTML}{5E1010}   % dark red
+\definecolor{greenlight}  {HTML}{2ECC71}   % treasure green
+\definecolor{greendark}   {HTML}{145C35}   % dark green
+\definecolor{mistlight}   {HTML}{E8DCC8}   % light text
+\definecolor{mistdim}     {HTML}{9A8A6A}   % body text
+\definecolor{stonetop}    {HTML}{2A1F18}   % card border
+\definecolor{winbg}       {HTML}{120F06}   % win page bg
+
+% ── hyperref setup ─────────────────────────────────────────
+\hypersetup{
+    colorlinks=true,
+    linkcolor=goldbright,
+    urlcolor=goldbright,
+    pdftitle={Mini Maze Game},
+    pdfauthor={Deon George},
+    pdfsubject={An Interactive PDF Maze},
+    hidelinks   % remove boxes, keep colours
+}
+
+% ── Helper: full-bleed coloured background ─────────────────
+\newcommand{\pagebg}[1]{%
+  \AddToShipoutPictureBG*{%
+    \AtPageLowerLeft{%
+      \color{#1}\rule{\paperwidth}{\paperheight}%
+    }%
+  }%
+}
+
+% ── Decorative TikZ border ─────────────────────────────────
+\newcommand{\cornerdeco}[1]{%
+\begin{tikzpicture}[remember picture, overlay]
+  % thin outer frame
+  \draw[color=#1, line width=0.6pt, opacity=0.55]
+    ([xshift=18pt, yshift=-18pt]current page.north west) rectangle
+    ([xshift=-18pt, yshift=18pt]current page.south east);
+  % thicker inner frame
+  \draw[color=#1, line width=1.2pt, opacity=0.25]
+    ([xshift=24pt, yshift=-24pt]current page.north west) rectangle
+    ([xshift=-24pt, yshift=24pt]current page.south east);
+  % corner ornaments
+  \foreach \anchor/\xmul/\ymul in {
+      north west/1/-1, north east/-1/-1,
+      south west/1/1,  south east/-1/1}{
+    \begin{scope}[shift={(current page.\anchor)}]
+      \draw[color=#1, line width=0.8pt, opacity=0.7]
+        (\xmul*18pt, \ymul*18pt) -- (\xmul*38pt, \ymul*18pt)
+        (\xmul*18pt, \ymul*18pt) -- (\xmul*18pt, \ymul*38pt);
+      \node[color=#1, opacity=0.5, font=\tiny]
+        at (\xmul*30pt, \ymul*30pt) {$\diamond$};
+    \end{scope}
+  }
+\end{tikzpicture}%
+}
+
+% ── Scene title bar (top accent strip) ─────────────────────
+\newcommand{\accentstrip}[1]{%
+\begin{tikzpicture}[remember picture, overlay]
+  \shade[left color=pagebg, middle color=#1, right color=pagebg,
+         opacity=0.8]
+    ([xshift=18pt, yshift=-18pt]current page.north west) rectangle
+    ([xshift=-18pt, yshift=-21pt]current page.north east);
+  \shade[left color=pagebg, middle color=#1, right color=pagebg,
+         opacity=0.25]
+    ([xshift=18pt, yshift=-22pt]current page.north west) rectangle
+    ([xshift=-18pt, yshift=-26pt]current page.north east);
+\end{tikzpicture}%
+}
+
+% ── Bottom credit strip ────────────────────────────────────
+\newcommand{\creditstrip}{%
+\begin{tikzpicture}[remember picture, overlay]
+  \node[color=mistdim, opacity=0.4, font=\tiny\scshape,
+        anchor=south, inner sep=8pt]
+    at (current page.south)
+    {A Mini Maze \quad$\cdot$\quad Deon George};
+\end{tikzpicture}%
+}
+
+% ── Big centred icon ───────────────────────────────────────
+\newcommand{\sceneicon}[1]{%
+  \begin{center}
+    \vspace{6pt}
+    {\fontsize{56}{56}\selectfont #1}
+    \vspace{-4pt}
+  \end{center}%
+}
+
+% ── Thin rule with diamond ─────────────────────────────────
+\newcommand{\goldrule}[1]{%
+  \begin{center}
+    \begin{tikzpicture}
+      \draw[color=#1, line width=0.5pt, opacity=0.6]
+        (0,0) -- (3.2cm, 0);
+      \node[color=#1, opacity=0.8] at (3.7cm, 0) {$\diamond$};
+      \draw[color=#1, line width=0.5pt, opacity=0.6]
+        (4.2cm,0) -- (7.4cm, 0);
+    \end{tikzpicture}
+  \end{center}%
+}
+
+% ── Choice button macro ────────────────────────────────────
+% #1 = accent colour   #2 = icon   #3 = label   #4 = link target
+\newcommand{\choicebtn}[4]{%
+  \vspace{6pt}
+  \begin{mdframed}[
+    backgroundcolor=#1!10!cardback,
+    linecolor=#1,
+    linewidth=0.7pt,
+    innerleftmargin=14pt,
+    innerrightmargin=14pt,
+    innertopmargin=10pt,
+    innerbottommargin=10pt,
+    roundcorner=2pt,
+    shadow=false
+  ]
+    \hyperlink{#4}{%
+      \color{mistlight}%
+      \textbf{#2}\quad
+      {\addfontfeatures{}%
+       \color{mistlight}\small #3}%
+      \hfill{\color{#1}\small$\rightarrow$}%
+    }
+  \end{mdframed}%
+  \vspace{2pt}%
+}
+
+% ── Section label (small caps above title) ─────────────────
+\newcommand{\scenetag}[2]{%
+  \begin{center}
+    {\color{#1}\fontsize{7.5}{7.5}\selectfont\scshape\addfontfeatures{}%
+     \letterspace{0.25em}#2}
+  \end{center}%
+}
+
+% ── Letterspace shim (works without fontspec) ──────────────
+\let\letterspace\relax
+\newcommand{\letterspace}[2]{\leavevmode\@tempdima #1\relax
+  \@tfor\@tmp:=#2\do{\kern\@tempdima\@tmp}\kern-\@tempdima}
+% simpler fallback:
+\renewcommand{\letterspace}[2]{#2}
+
+
+% ═══════════════════════════════════════════════════════════
+\begin{document}
+\pagestyle{empty}
+
+% ╔══════════════════════════════════════════════╗
+% ║               S T A R T                      ║
+% ╚══════════════════════════════════════════════╝
+\newpage
+\pagebg{pagebg}
+\hypertarget{start}{}
+\accentstrip{goldbright}
+\cornerdeco{goldbright}
+\creditstrip
+
+\vspace*{2.8cm}
+
+\sceneicon{��️}
+
+\begin{center}
+  {\color{golddim}\fontsize{8}{8}\selectfont\scshape — The Beginning —}
+\end{center}
+
+\goldrule{golddim}
+
+\begin{center}
+  {\color{mistlight}\fontsize{30}{34}\selectfont\bfseries\scshape
+    A Dark Room}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+  \begin{minipage}{0.62\textwidth}
+    \setstretch{1.65}
+    \color{mistdim}\normalsize\itshape\centering
+    You stand in a chamber of ancient stone,\\
+    torchlight flickering across two weathered doors.\\[6pt]
+    {\color{mistlight}\normalfont\small Which path calls to you?}
+  \end{minipage}
+\end{center}
+
+\vspace{1.2cm}
+
+\begin{center}
+\begin{minipage}{0.55\textwidth}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!8!cardback,
+  linecolor=goldbright,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{roomA}{\color{mistlight}\textbf{��}\quad
+  {\small Pass through Door A}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!8!cardback,
+  linecolor=goldbright,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{roomB}{\color{mistlight}\textbf{��}\quad
+  {\small Pass through Door B}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\end{minipage}
+\end{center}
+
+
+% ╔══════════════════════════════════════════════╗
+% ║               R O O M   A                    ║
+% ╚══════════════════════════════════════════════╝
+\newpage
+\pagebg{blooddark}
+\hypertarget{roomA}{}
+\accentstrip{bloodbright}
+\cornerdeco{bloodbright}
+
+\vspace*{2.8cm}
+
+\sceneicon{��}
+
+\begin{center}
+  {\color{bloodbright!60!white}\fontsize{8}{8}\selectfont\scshape — Room A —}
+\end{center}
+
+\goldrule{bloodbright}
+
+\begin{center}
+  {\color{bloodbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+    A Monster!}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+  \begin{minipage}{0.62\textwidth}
+    \setstretch{1.65}
+    \color{mistdim!80!bloodbright}\normalsize\itshape\centering
+    You step into the gloom and \textcolor{mistlight}{something stirs}.\\
+    Red eyes gleam from the shadows.\\[6pt]
+    {\color{mistlight}\normalfont\small The creature rises — massive, ravenous, waiting.}
+  \end{minipage}
+\end{center}
+
+\vspace{1.2cm}
+
+\begin{center}
+\begin{minipage}{0.55\textwidth}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=bloodbright!12!cardback,
+  linecolor=bloodbright,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{dead}{\color{mistlight}\textbf{⚔️}\quad
+  {\small Stand and fight}\hfill{\color{bloodbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!6!cardback,
+  linecolor=golddim,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{start}{\color{mistlight}\textbf{��}\quad
+  {\small Flee back through the door}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\end{minipage}
+\end{center}
+
+
+% ╔══════════════════════════════════════════════╗
+% ║               R O O M   B                    ║
+% ╚══════════════════════════════════════════════╝
+\newpage
+\pagebg{greendark!40!pagebg}
+\hypertarget{roomB}{}
+\accentstrip{greenlight}
+\cornerdeco{greenlight}
+
+\vspace*{2.8cm}
+
+\sceneicon{��}
+
+\begin{center}
+  {\color{greenlight!70!white}\fontsize{8}{8}\selectfont\scshape — Room B —}
+\end{center}
+
+\goldrule{greenlight}
+
+\begin{center}
+  {\color{greenlight!80!white}\fontsize{30}{34}\selectfont\bfseries\scshape
+    A Treasure Chest!}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+  \begin{minipage}{0.62\textwidth}
+    \setstretch{1.65}
+    \color{mistdim}\normalsize\itshape\centering
+    The air smells of old cedar and \textcolor{mistlight}{forgotten gold}.\\
+    A chest rests upon a plinth, its brass lock glinting,\\[6pt]
+    {\color{mistlight}\normalfont\small as if placed here just for you.}
+  \end{minipage}
+\end{center}
+
+\vspace{1.2cm}
+
+\begin{center}
+\begin{minipage}{0.55\textwidth}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=greenlight!10!cardback,
+  linecolor=greenlight,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{win}{\color{mistlight}\textbf{��️}\quad
+  {\small Open the chest}\hfill{\color{greenlight}\small$\rightarrow$}}
+\end{mdframed}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!6!cardback,
+  linecolor=golddim,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{start}{\color{mistlight}\textbf{↩️}\quad
+  {\small Return to the dark room}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\end{minipage}
+\end{center}
+
+
+% ╔══════════════════════════════════════════════╗
+% ║            G A M E   O V E R                 ║
+% ╚══════════════════════════════════════════════╝
+\newpage
+\pagebg{blooddark!60!black}
+\hypertarget{dead}{}
+\accentstrip{bloodbright}
+\cornerdeco{bloodbright}
+
+\vspace*{2.8cm}
+
+\sceneicon{��}
+
+\begin{center}
+  {\color{bloodbright!60!white}\fontsize{8}{8}\selectfont\scshape — The End —}
+\end{center}
+
+\goldrule{bloodbright}
+
+\begin{center}
+  {\color{bloodbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+    Game Over}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+  \begin{minipage}{0.62\textwidth}
+    \setstretch{1.65}
+    \color{mistdim!80!bloodbright}\normalsize\itshape\centering
+    You fought with courage,\\
+    but the monster was older than memory itself.\\[6pt]
+    {\color{mistlight}\normalfont\small Your candle goes out.}
+  \end{minipage}
+\end{center}
+
+\vspace{1.2cm}
+
+\begin{center}
+\begin{minipage}{0.55\textwidth}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!8!cardback,
+  linecolor=goldbright,
+  linewidth=0.7pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{start}{\color{mistlight}\textbf{��️}\quad
+  {\small Light another candle and try again}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\end{minipage}
+\end{center}
+
+
+% ╔══════════════════════════════════════════════╗
+% ║               Y O U   W I N !                ║
+% ╚══════════════════════════════════════════════╝
+\newpage
+\pagebg{winbg}
+\hypertarget{win}{}
+\accentstrip{goldbright}
+\cornerdeco{goldbright}
+
+\vspace*{2.2cm}
+
+% Star field decoration
+\begin{tikzpicture}[remember picture, overlay]
+  \foreach \x/\y/\r in {
+    0.1/0.85/1.2, 0.9/0.9/0.9, 0.5/0.95/1.5,
+    0.2/0.7/0.8,  0.8/0.75/1.0, 0.05/0.6/0.6,
+    0.95/0.65/0.7,0.35/0.8/0.5, 0.65/0.88/0.6,
+    0.15/0.92/0.4,0.75/0.92/0.5
+  }{
+    \node[circle, fill=goldbright, opacity=0.25,
+          inner sep=\r pt]
+      at ($(current page.south west)!\x!(current page.south east)!%
+         \y!(current page.north east)$) {};
+  }
+\end{tikzpicture}
+
+\sceneicon{��}
+
+\begin{center}
+  {\color{golddim}\fontsize{8}{8}\selectfont\scshape — Victory —}
+\end{center}
+
+\goldrule{goldbright}
+
+\begin{center}
+  {\color{goldbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+    You Win!}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+  \begin{minipage}{0.65\textwidth}
+    \setstretch{1.65}
+    \color{mistdim}\normalsize\itshape\centering
+    The lid creaks open.  Inside — \textcolor{goldbright}{mountains of gold},\\
+    jewels older than kingdoms, and a crown fit for a legend.\\[6pt]
+    {\color{mistlight}\normalfont\small The dungeon trembles with applause.}
+  \end{minipage}
+\end{center}
+
+\vspace{1.2cm}
+
+\begin{center}
+\begin{minipage}{0.55\textwidth}
+
+\vspace{6pt}
+\begin{mdframed}[
+  backgroundcolor=goldbright!12!cardback,
+  linecolor=goldbright,
+  linewidth=1pt,
+  innerleftmargin=14pt,
+  innerrightmargin=14pt,
+  innertopmargin=11pt,
+  innerbottommargin=11pt,
+  roundcorner=2pt
+]
+  \hyperlink{start}{\color{goldbright}\textbf{��}\quad
+  {\small Descend into the dark once more}\hfill{\color{goldbright}\small$\rightarrow$}}
+\end{mdframed}
+
+\end{minipage}
+\end{center}
+
+\end{document}
