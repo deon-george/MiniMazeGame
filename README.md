@@ -1,21 +1,17 @@
 # Mini Maze Game
 
 A beautifully designed, interactive PDF mini maze game created entirely in LaTeX. 
-
 This project leverages LaTeX's powerful drawing (`tikz`) and hyperlinking (`hyperref`) capabilities to create a dark-themed, "Choose Your Own Adventure" style game directly within a PDF file.
 
-## Features
 
-- **Interactive Gameplay**: Navigate through rooms using clickable PDF hyperlinks.
-- **Rich Visual Design**: Custom color palette, decorative borders, and gradient accents.
-- **Immersive Typography**: Styled text with letterspacing and custom fonts for a premium feel.
-- **Multiple Endings**: Face the monster or find the treasure!
+> [!TIP]
+> 📑 [Click here to play the game (latexGame.pdf)](latexGame.pdf)
 
 ## Prerequisites
 
 To compile the game, you will need a LaTeX distribution (like TeX Live, MiKTeX, or MacTeX) installed on your system. 
 
-## How to Play
+## How to Build
 
 1. **Compile the LaTeX File**:
    Open your terminal or command prompt, navigate to the directory containing `latexGame.tex`, and run:
