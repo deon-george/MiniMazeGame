@@ -11,14 +11,14 @@
 \usepackage[margin=0pt]{geometry}   % full bleed pages
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{decorations.pathmorphing, shadows, patterns}
+\usetikzlibrary{decorations.pathmorphing, shadows, patterns, calc}
 \usepackage{hyperref}
 \usepackage{mdframed}
 \usepackage{eso-pic}
 \usepackage{graphicx}
 \usepackage{calc}
 \usepackage{lmodern}
-\usepackage{microtype}
+\usepackage[nopatch=footnote]{microtype}
 \usepackage{setspace}
 \usepackage{array}
 
@@ -186,7 +186,7 @@
 
 \vspace*{2.8cm}
 
-\sceneicon{��️}
+\sceneicon{$\star$}
 
 \begin{center}
   {\color{golddim}\fontsize{8}{8}\selectfont\scshape — The Beginning —}
@@ -195,7 +195,7 @@
 \goldrule{golddim}
 
 \begin{center}
-  {\color{mistlight}\fontsize{30}{34}\selectfont\bfseries\scshape
+  {\color{mistlight}\fontsize{30}{34}\selectfont\scshape
     A Dark Room}
 \end{center}
 
@@ -227,7 +227,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{roomA}{\color{mistlight}\textbf{��}\quad
+  \hyperlink{roomA}{\color{mistlight}\textbf{[A]}\quad
   {\small Pass through Door A}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -242,7 +242,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{roomB}{\color{mistlight}\textbf{��}\quad
+  \hyperlink{roomB}{\color{mistlight}\textbf{[B]}\quad
   {\small Pass through Door B}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -261,7 +261,7 @@
 
 \vspace*{2.8cm}
 
-\sceneicon{��}
+\sceneicon{!}
 
 \begin{center}
   {\color{bloodbright!60!white}\fontsize{8}{8}\selectfont\scshape — Room A —}
@@ -270,7 +270,7 @@
 \goldrule{bloodbright}
 
 \begin{center}
-  {\color{bloodbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+  {\color{bloodbright}\fontsize{30}{34}\selectfont\scshape
     A Monster!}
 \end{center}
 
@@ -302,7 +302,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{dead}{\color{mistlight}\textbf{⚔️}\quad
+  \hyperlink{dead}{\color{mistlight}\textbf{[!]}\quad
   {\small Stand and fight}\hfill{\color{bloodbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -317,7 +317,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{start}{\color{mistlight}\textbf{��}\quad
+  \hyperlink{start}{\color{mistlight}\textbf{[<]}\quad
   {\small Flee back through the door}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -336,7 +336,7 @@
 
 \vspace*{2.8cm}
 
-\sceneicon{��}
+\sceneicon{+}
 
 \begin{center}
   {\color{greenlight!70!white}\fontsize{8}{8}\selectfont\scshape — Room B —}
@@ -345,7 +345,7 @@
 \goldrule{greenlight}
 
 \begin{center}
-  {\color{greenlight!80!white}\fontsize{30}{34}\selectfont\bfseries\scshape
+  {\color{greenlight!80!white}\fontsize{30}{34}\selectfont\scshape
     A Treasure Chest!}
 \end{center}
 
@@ -377,7 +377,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{win}{\color{mistlight}\textbf{��️}\quad
+  \hyperlink{win}{\color{mistlight}\textbf{[+]}\quad
   {\small Open the chest}\hfill{\color{greenlight}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -392,7 +392,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{start}{\color{mistlight}\textbf{↩️}\quad
+  \hyperlink{start}{\color{mistlight}\textbf{[<]}\quad
   {\small Return to the dark room}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -411,7 +411,7 @@
 
 \vspace*{2.8cm}
 
-\sceneicon{��}
+\sceneicon{X}
 
 \begin{center}
   {\color{bloodbright!60!white}\fontsize{8}{8}\selectfont\scshape — The End —}
@@ -420,7 +420,7 @@
 \goldrule{bloodbright}
 
 \begin{center}
-  {\color{bloodbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+  {\color{bloodbright}\fontsize{30}{34}\selectfont\scshape
     Game Over}
 \end{center}
 
@@ -452,7 +452,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{start}{\color{mistlight}\textbf{��️}\quad
+  \hyperlink{start}{\color{mistlight}\textbf{[<]}\quad
   {\small Light another candle and try again}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
@@ -486,7 +486,7 @@
   }
 \end{tikzpicture}
 
-\sceneicon{��}
+\sceneicon{*}
 
 \begin{center}
   {\color{golddim}\fontsize{8}{8}\selectfont\scshape — Victory —}
@@ -495,7 +495,7 @@
 \goldrule{goldbright}
 
 \begin{center}
-  {\color{goldbright}\fontsize{30}{34}\selectfont\bfseries\scshape
+  {\color{goldbright}\fontsize{30}{34}\selectfont\scshape
     You Win!}
 \end{center}
 
@@ -527,7 +527,7 @@
   innerbottommargin=11pt,
   roundcorner=2pt
 ]
-  \hyperlink{start}{\color{goldbright}\textbf{��}\quad
+  \hyperlink{start}{\color{goldbright}\textbf{[<]}\quad
   {\small Descend into the dark once more}\hfill{\color{goldbright}\small$\rightarrow$}}
 \end{mdframed}
 
